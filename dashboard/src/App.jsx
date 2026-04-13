@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { SCENARIOS } from "./scenarios.js";
 
 /* ══════════════════════════════════════════════════════════════════════════════
    SUPABASE CONFIG
@@ -27,98 +28,12 @@ async function query(table, params = "") {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   GROWTH STAGE MOCK DATA — W15 2026 ($25.8K MRR, 220 subs)
-   The investor illusion: 8+ weeks of memory, dunning recovery, expansion surge.
+   DEFAULT MOCK — Growth Stage scenario (scenario index 0 = Dunning Spiral by default)
+   All 15 scenarios live in scenarios.js; this is just the seed for initial render.
    ══════════════════════════════════════════════════════════════════════════════ */
-const MOCK = {
-  reporting_week: "2026-W15",
-  last_run: "2026-04-09T09:00:00Z",
-  mrr: { current: 25800, previous: 23600, change_pct: 9.3 },
-  active_subscriptions: 220,
-  churn: { rate: 0.0, at_risk: 0, reason: "All dunning resolved. 2 accounts recovered via Dunning Recovery playbook (W14). Expansion Revenue playbook activated." },
-  velocity: { opened: 12, closed: 11, net: 1, avg_close_hrs: 32.4, backlog: 28 },
-  blocked: [],
-  confidence: {
-    current: 0.88,
-    history: [0.71, 0.73, 0.76, 0.80, 0.82, 0.84, 0.78, 0.77, 0.81, 0.82, 0.72, 0.81, 0.88],
-  },
-  red_flags: [],
-  skills: [
-    { name: "saas_metrics_dashboard", tier: 0, agent: "CFO", status: "healthy", success_rate: 100 },
-    { name: "unit_economics_rule40", tier: 0, agent: "CFO", status: "healthy", success_rate: 100 },
-    { name: "github_issue_auto_triage", tier: 1, agent: "PM", status: "healthy", success_rate: 97 },
-    { name: "weekly_digest_delivery", tier: 1, agent: "CEO", status: "healthy", success_rate: 100 },
-    { name: "dogfood_audit_cycle", tier: 0, agent: "system", status: "healthy", success_rate: 100 },
-  ],
-  digests: [
-    { period: "2026-W15", status: "delivered", channel: "slack" },
-    { period: "2026-W14", status: "delivered", channel: "email" },
-    { period: "2026-W13", status: "delivered", channel: "slack" },
-  ],
-  cost: { last_run: 0.00038, monthly: 0.016, ceiling: 25.0 },
-  recommendation: "Expansion Revenue playbook delivered: 4 Tier-1→Tier-2 upgrades = +$2,200/mo recovered + surpassed. Recommend activating Tier-3 upgrade targeting for 6 accounts showing enterprise-level usage signals (>$400/mo threshold).",
-  advisor_note: "Expansion pattern confirmed — matches W06 playbook run. Dunning-resolved cohort + upgrade campaign = NRR recovery. Recommend quarterly expansion cycles targeting 90-day usage trajectory data.",
-  advisor_confidence: 0.88,
-  playbook_match: { name: "Expansion Revenue", success_rate: 0.77, applications: 6, flag: "strong" },
-  unit_economics: { rule40_score: 47.3, health_grade: "Excellent", ltv_simple: 5160, arpu: 117.3, quick_ratio: 4.1, nrr_pct: 104.2 },
-  triage: { total: 12, categories: { bug: 2, feature: 6, chore: 3, question: 1 }, priorities: { P0: 0, P1: 1, P2: 5, P3: 6 }, pending_review: 2 },
-  audit_events: [
-    { event_type: "RUN_COMPLETE", severity: "info", message: "Weekly run W15 completed. MRR: $25,800 (+9.3%).", created_at: "2026-04-09T09:01:12Z" },
-    { event_type: "ADVISOR_MATCH", severity: "info", message: "Playbook matched: Expansion Revenue (77%, 6 runs, strong).", created_at: "2026-04-09T09:01:11Z" },
-    { event_type: "OUTCOME_RECORDED", severity: "info", message: "W14 dunning outreach → 2 accounts recovered ($440/mo).", created_at: "2026-04-09T09:01:10Z" },
-    { event_type: "CONFIDENCE_RECORDED", severity: "info", message: "CEO confidence: 0.88 (calibrated from 13-week history).", created_at: "2026-04-09T09:01:09Z" },
-    { event_type: "SLACK_SENT", severity: "info", message: "W15 digest posted to #all-ai-ops-dogfood.", created_at: "2026-04-09T09:01:08Z" },
-    { event_type: "EXPANSION_TRIGGERED", severity: "info", message: "Expansion Revenue playbook: 4 Tier-1→Tier-2 upgrades = +$2,200/mo.", created_at: "2026-04-09T09:01:06Z" },
-    { event_type: "MEMORY_WRITTEN", severity: "info", message: "Memory page: 2026-W15 Operational Report (4 chunks embedded).", created_at: "2026-04-09T09:01:04Z" },
-    { event_type: "NODE_COMPLETE", severity: "debug", message: "dogfood_audit node completed in 0.31s.", created_at: "2026-04-09T09:01:02Z" },
-  ],
-  deltas: { mrr_pct: 9.3, velocity_net: 1, backlog_delta: -10, confidence_delta: 0.07 },
-  saved_mrr: {
-    direct: { amount: 5770, actions: 5, avg_confidence: 0.95 },
-    likely: { amount: 3350, actions: 4, avg_confidence: 0.73 },
-    reported: { amount: 1800, actions: 3, avg_confidence: null },
-  },
-  memory_health: { total_pages: 13, matches_found: 4, avg_relevance: 0.91, active_playbooks: 6, stale_playbooks: 0 },
-  llm_provider: "Gemini 2.5 Flash",
-  cross_model_consistency: 94,
-};
+const MOCK = SCENARIOS[0].data;
 
-/* ══════════════════════════════════════════════════════════════════════════════
-   MOCK MEMORY PAGES — 13-week Growth Stage story (fallback when Supabase unavailable)
-   ══════════════════════════════════════════════════════════════════════════════ */
-const MOCK_MEMORY_PAGES = [
-  { id: "p-w15", title: "2026-W15 Operational Report", category: "expansion", tags: ["mrr-growth", "playbook:Expansion Revenue"], compiled_truth: "MRR rose 9.3% to $25,800. 220 active subscriptions. 0 accounts flagged for churn risk. Engineering closed 11 issues (backlog: 28). Confidence: 0.88. Playbook applied: Expansion Revenue. CEO recommendation: Activate Tier-3 upgrade targeting for 6 accounts with enterprise-level usage signals (>$400/mo threshold). Advisor: Expansion pattern confirmed — matches W06 playbook run. Dunning-resolved cohort + upgrade campaign = NRR recovery.", created_at: "2026-04-09T09:01:04Z", metadata: { reporting_week: "2026-W15", confidence: 0.88 }, timeline: [{ event: "EXPANSION_TRIGGERED", detail: "Expansion Revenue playbook: 4 Tier-1→Tier-2 upgrades = +$2,200/mo." }, { event: "OUTCOME_RECORDED", detail: "W14 dunning recovery: 2 accounts restored ($440/mo)." }] },
-  { id: "p-w14", title: "2026-W14 Operational Report", category: "retention", tags: ["churn", "playbook:Dunning Recovery"], compiled_truth: "MRR rose 1.7% to $23,600. 216 active subscriptions. 2 accounts flagged for churn risk. Engineering closed 10 issues (backlog: 38). Confidence: 0.81. Playbook applied: Dunning Recovery. CEO recommendation: Dunning Recovery playbook: 2 accounts restored. Recommend formalizing outreach SLA and adding payment-method-update nudge to onboarding. Re-activate expansion targeting.", created_at: "2026-04-02T09:01:04Z", metadata: { reporting_week: "2026-W14", confidence: 0.81 }, timeline: [{ event: "ADVISOR_MATCH", detail: "Playbook matched: Dunning Recovery (80%, 12 runs)." }, { event: "OUTCOME_RECORDED", detail: "2 delinquent accounts restored via personal outreach." }] },
-  { id: "p-w13", title: "2026-W13 Operational Report", category: "churn_prevention", tags: ["churn", "mrr-decline", "red-flags"], compiled_truth: "MRR declined 2.1% to $23,200. 212 active subscriptions. 4 accounts flagged for churn risk. Engineering closed 6 issues (backlog: 41). Confidence: 0.72. Risk escalation triggered. CEO recommendation: CRITICAL — 4 churned accounts ($500 net MRR loss). Initiate revenue-cliff response: activate Expansion Revenue playbook for 8 high-usage accounts, post-mortem on W11–W13 dunning cohort. Advisor: W06 activation cohort → W13 churn confirms 63-day lag hypothesis.", created_at: "2026-03-26T09:01:04Z", metadata: { reporting_week: "2026-W13", confidence: 0.72 }, timeline: [{ event: "RISK_ESCALATION", detail: "4 accounts churned — revenue cliff detected (-$500 net MRR)." }, { event: "RED_FLAG", detail: "Churn spike: 4 simultaneous cancellations in W11–W13 dunning cohort." }] },
-  { id: "p-w12", title: "2026-W12 Operational Report", category: "retention", tags: ["churn"], compiled_truth: "MRR rose 0.4% to $23,700. 216 active subscriptions. 2 accounts flagged for churn risk. Engineering closed 8 issues (backlog: 35). Confidence: 0.82. CEO recommendation: Growth plateau following dunning event. Expansion Revenue playbook paused pending dunning resolution. Re-activate once delinquency clears.", created_at: "2026-03-19T09:01:04Z", metadata: { reporting_week: "2026-W12", confidence: 0.82 }, timeline: [{ event: "CEO_RECOMMEND", detail: "Expansion pause maintained — 2 delinquent accounts still at risk." }] },
-  { id: "p-w11", title: "2026-W11 Operational Report", category: "retention", tags: ["churn", "playbook:Dunning Recovery"], compiled_truth: "MRR rose 2.2% to $23,600. 215 active subscriptions. 3 accounts flagged for churn risk. Engineering closed 11 issues (backlog: 33). Confidence: 0.81. Playbook applied: Dunning Recovery. CEO recommendation: Dunning recovery underway: 3 of 5 accounts restored. Maintain 48h outreach SLA for remaining 2. Monitor W11 cohort through billing cycle.", created_at: "2026-03-12T09:01:04Z", metadata: { reporting_week: "2026-W11", confidence: 0.81 }, timeline: [{ event: "OUTCOME_RECORDED", detail: "3 dunning accounts recovered: $890/mo restored." }, { event: "ADVISOR_MATCH", detail: "Dunning Recovery playbook: 60% recovery rate (below 80% baseline)." }] },
-  { id: "p-w10", title: "2026-W10 Operational Report", category: "churn_prevention", tags: ["churn", "red-flags"], compiled_truth: "MRR rose 0.9% to $23,100. 210 active subscriptions. 5 accounts flagged for churn risk. Engineering closed 7 issues (backlog: 37). Confidence: 0.77. CEO recommendation: URGENT — 5 invoice failures in 7 days. Activate Dunning Recovery playbook immediately. Prioritize accounts >$150/mo. Every 48h delay reduces recovery probability by ~15%. Advisor: Pattern: 5 simultaneous failures = shared-cause indicator. Check if these were all onboarded in same 2-week window.", created_at: "2026-03-05T09:01:04Z", metadata: { reporting_week: "2026-W10", confidence: 0.77 }, timeline: [{ event: "RISK_ESCALATION", detail: "5 invoice failures detected — dunning escalation." }, { event: "CEO_RECOMMEND", detail: "Dunning Recovery playbook activated — 48h outreach SLA." }] },
-  { id: "p-w09", title: "2026-W09 Operational Report", category: "churn_prevention", tags: ["churn", "playbook:Dunning Recovery"], compiled_truth: "MRR rose 2.7% to $22,900. 208 active subscriptions. 2 accounts flagged for churn risk. Engineering closed 9 issues (backlog: 34). Confidence: 0.78. Playbook applied: Dunning Recovery. CEO recommendation: Dunning signals detected. Activate personal outreach for 2 at-risk accounts within 24h. Success rate 80% for same-week recovery. Advisor: W06 activation cohort now hitting billing cycle (63 days). Matches historical dunning lag.", created_at: "2026-02-26T09:01:04Z", metadata: { reporting_week: "2026-W09", confidence: 0.78 }, timeline: [{ event: "ADVISOR_MATCH", detail: "Dunning lag hypothesis: W06 cohort → W09 dunning (63-day pattern)." }] },
-  { id: "p-w08", title: "2026-W08 Operational Report", category: "expansion", tags: ["mrr-growth"], compiled_truth: "MRR rose 4.2% to $22,300. 203 active subscriptions. 0 accounts flagged for churn risk. Engineering closed 14 issues (backlog: 31). Confidence: 0.84. CEO recommendation: Peak acquisition week. Activation rate critical — ensure all new accounts complete onboarding within 48h to protect NRR. Advisor: Activation bottleneck pattern detected. W06 showed activation drop → W09 dunning correlation (60-day lag). Monitor this cohort at W14.", created_at: "2026-02-19T09:01:04Z", metadata: { reporting_week: "2026-W08", confidence: 0.84 }, timeline: [{ event: "RUN_COMPLETE", detail: "Peak acquisition week. 14 issues closed." }, { event: "ADVISOR_MATCH", detail: "Activation lag hypothesis recorded for W09/W14 monitoring." }] },
-  { id: "p-w07", title: "2026-W07 Operational Report", category: "expansion", tags: ["mrr-growth"], compiled_truth: "MRR rose 2.9% to $21,400. 195 active subscriptions. 0 accounts flagged for churn risk. Engineering closed 10 issues (backlog: 35). Confidence: 0.82. CEO recommendation: Growth compounding. No action required. Monitor backlog — velocity strong but trending slower than acquisitions.", created_at: "2026-02-12T09:01:04Z", metadata: { reporting_week: "2026-W07", confidence: 0.82 }, timeline: [{ event: "RUN_COMPLETE", detail: "Growth normalizing. No flags." }] },
-  { id: "p-w06", title: "2026-W06 Operational Report", category: "expansion", tags: ["mrr-growth", "playbook:Expansion Revenue"], compiled_truth: "MRR rose 5.6% to $20,800. 189 active subscriptions. 0 accounts flagged for churn risk. Engineering closed 12 issues (backlog: 33). Confidence: 0.80. Playbook applied: Expansion Revenue. CEO recommendation: Expansion Revenue playbook triggered: 10 accounts showing Tier-2 usage signals. Recommend proactive upgrade outreach this week. Advisor: This matches the W04 expansion pattern. Upgrade conversion rate was 34% last time. Recommend same 3-email sequence with usage-threshold triggers.", created_at: "2026-02-05T09:01:04Z", metadata: { reporting_week: "2026-W06", confidence: 0.80 }, timeline: [{ event: "ADVISOR_MATCH", detail: "Expansion Revenue playbook: first run. 8 Tier-1→Tier-2 upgrades = +$1,800/mo." }, { event: "OUTCOME_RECORDED", detail: "Expansion Revenue playbook delivered +$1,800/mo in upgrades." }] },
-  { id: "p-w05", title: "2026-W05 Operational Report", category: "expansion", tags: ["mrr-growth"], compiled_truth: "MRR rose 4.2% to $19,700. 179 active subscriptions. 0 accounts flagged for churn risk. Engineering closed 11 issues (backlog: 36). Confidence: 0.76. CEO recommendation: Expansion. MRR compounding. No action required. Monitor backlog — velocity strong.", created_at: "2026-01-29T09:01:04Z", metadata: { reporting_week: "2026-W05", confidence: 0.76 }, timeline: [{ event: "RUN_COMPLETE", detail: "Steady growth. MRR compounding." }] },
-  { id: "p-w04", title: "2026-W04 Operational Report", category: "expansion", tags: ["mrr-growth"], compiled_truth: "MRR rose 3.8% to $18,900. 172 active subscriptions. 0 accounts flagged for churn risk. Engineering closed 9 issues (backlog: 39). Confidence: 0.73. CEO recommendation: Growth compounding. No action required. Monitor backlog.", created_at: "2026-01-22T09:01:04Z", metadata: { reporting_week: "2026-W04", confidence: 0.73 }, timeline: [{ event: "RUN_COMPLETE", detail: "Steady growth. No flags." }] },
-  { id: "p-w03", title: "2026-W03 Operational Report", category: "reporting", tags: ["mrr-growth"], compiled_truth: "MRR rose 4.6% to $18,200. 165 active subscriptions. 0 accounts flagged for churn risk. Engineering closed 8 issues (backlog: 42). Confidence: 0.71. CEO recommendation: Baseline healthy. Sustain new-account velocity. Recommend pre-qualifying Tier-2 upgrade targets based on usage data.", created_at: "2026-01-15T09:01:04Z", metadata: { reporting_week: "2026-W03", confidence: 0.71 }, timeline: [{ event: "RUN_COMPLETE", detail: "Baseline established. Healthy cohort." }] },
-];
-
-/* ══════════════════════════════════════════════════════════════════════════════
-   MOCK ATTRIBUTION — 12 ledger entries across 3 tiers (fallback)
-   ══════════════════════════════════════════════════════════════════════════════ */
-const MOCK_ATTRIBUTION_ENTRIES = [
-  { id: "a1",  week: "2026-W15", attribution_tier: "direct",            mrr_amount: 2200, action_id: "act-w15-d1", evidence: { confidence: 0.97, action: "4 Tier-1→Tier-2 upgrades (Expansion Revenue playbook)", playbook: "Expansion Revenue" } },
-  { id: "a2",  week: "2026-W15", attribution_tier: "direct",            mrr_amount: 440,  action_id: "act-w15-d2", evidence: { confidence: 0.95, action: "2 dunning accounts restored via outreach (W14 cohort)", playbook: "Dunning Recovery" } },
-  { id: "a3",  week: "2026-W15", attribution_tier: "likely",            mrr_amount: 1200, action_id: "act-w15-l1", evidence: { confidence: 0.78, action: "6 new accounts onboarded (correlation: upgraded onboarding sequence)" } },
-  { id: "a4",  week: "2026-W15", attribution_tier: "likely",            mrr_amount: 550,  action_id: "act-w15-l2", evidence: { confidence: 0.71, action: "2 at-risk accounts retained after CEO outreach" } },
-  { id: "a5",  week: "2026-W15", attribution_tier: "operator_reported", mrr_amount: 900,  action_id: "act-w15-r1", evidence: { action: "Founder reports: customer upgraded after reading executive summary" } },
-  { id: "a6",  week: "2026-W14", attribution_tier: "direct",            mrr_amount: 440,  action_id: "act-w14-d1", evidence: { confidence: 0.94, action: "2 dunning accounts restored — Dunning Recovery playbook", playbook: "Dunning Recovery" } },
-  { id: "a7",  week: "2026-W14", attribution_tier: "likely",            mrr_amount: 620,  action_id: "act-w14-l1", evidence: { confidence: 0.74, action: "3 new accounts onboarded week following churn spike" } },
-  { id: "a8",  week: "2026-W11", attribution_tier: "direct",            mrr_amount: 890,  action_id: "act-w11-d1", evidence: { confidence: 0.93, action: "3 dunning accounts recovered via personal outreach", playbook: "Dunning Recovery" } },
-  { id: "a9",  week: "2026-W06", attribution_tier: "direct",            mrr_amount: 1800, action_id: "act-w06-d1", evidence: { confidence: 0.96, action: "8 Tier-1→Tier-2 upgrades (first Expansion Revenue playbook run)", playbook: "Expansion Revenue" } },
-  { id: "a10", week: "2026-W06", attribution_tier: "likely",            mrr_amount: 980,  action_id: "act-w06-l1", evidence: { confidence: 0.69, action: "12 new activations correlated with enhanced onboarding sequence" } },
-  { id: "a11", week: "2026-W06", attribution_tier: "operator_reported", mrr_amount: 600,  action_id: "act-w06-r1", evidence: { action: "2 enterprise leads converted after reading operational report (founder reported)" } },
-  { id: "a12", week: "2026-W06", attribution_tier: "operator_reported", mrr_amount: 300,  action_id: "act-w06-r2", evidence: { action: "Advisor recommendation cited in investor update (attribution reported by founder)" } },
-];
+/* All scenario mock data lives in scenarios.js — imported above as SCENARIOS */
 
 /* ══════════════════════════════════════════════════════════════════════════════
    CHART COMPONENTS
@@ -225,10 +140,23 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isSmallMobile, setIsSmallMobile] = useState(window.innerWidth < 480);
-  const [memoryPages, setMemoryPages] = useState(MOCK_MEMORY_PAGES);
-  const [attributionEntries, setAttributionEntries] = useState(MOCK_ATTRIBUTION_ENTRIES);
+  const [memoryPages, setMemoryPages] = useState(SCENARIOS[0].memoryPages);
+  const [attributionEntries, setAttributionEntries] = useState(SCENARIOS[0].attributionEntries);
   const [expandedPage, setExpandedPage] = useState(null);
+  const [selectedScenario, setSelectedScenario] = useState(0);
   const t = themes[mode];
+
+  /* When scenario changes (and we're in demo mode), swap all mock data */
+  const handleScenarioChange = useCallback((idx) => {
+    if (live) return; // live mode: scenario selector is disabled
+    const s = SCENARIOS[idx];
+    setSelectedScenario(idx);
+    setD(s.data);
+    setMemoryPages(s.memoryPages);
+    setAttributionEntries(s.attributionEntries);
+    setExpandedPage(null);
+    setActiveTab("overview");
+  }, [live]);
 
   useEffect(() => {
     const handler = () => {
@@ -435,11 +363,60 @@ export default function Dashboard() {
             DEMO MODE
           </span>
           <span style={{ fontSize: 12, color: "#8b8fa8" }}>
-            Viewing Growth Stage scenario — 13 weeks of simulated operational data. No Stripe or GitHub connection required.
+            15 behavioral scenarios — simulated operational data. No Stripe or GitHub connection required.
           </span>
           <a href="https://forge-dynamics-executive-crew.vercel.app" style={{ fontSize: 12, color: "#D4A853", fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }} onMouseOver={e => e.target.style.textDecoration = "underline"} onMouseOut={e => e.target.style.textDecoration = "none"}>
             Connect your own data →
           </a>
+        </div>
+      )}
+
+      {/* ── SCENARIO SELECTOR ───────────────────────────────────────── */}
+      {!live && !loading && (
+        <div style={{ background: t.surface, borderBottom: `1px solid ${t.border}`, padding: isMobile ? "12px 16px" : "12px 32px" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 11, color: t.textSecondary, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2, whiteSpace: "nowrap" }}>Scenario</span>
+              <span style={{ fontSize: 11, color: t.accent, background: t.accentMuted, padding: "2px 8px", borderRadius: 10, fontWeight: 700 }}>{SCENARIOS[selectedScenario].label}</span>
+              <span style={{ fontSize: 11, color: t.textSecondary }}>{SCENARIOS[selectedScenario].description}</span>
+            </div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {SCENARIOS.map((s, idx) => {
+                const badgeColors = {
+                  churn: { bg: "rgba(248,113,113,0.15)", text: "#F87171" },
+                  engineering: { bg: "rgba(167,139,250,0.15)", text: "#A78BFA" },
+                  growth: { bg: "rgba(74,222,128,0.15)", text: "#4ADE80" },
+                  stable: { bg: "rgba(136,153,170,0.15)", text: "#8899AA" },
+                  risk: { bg: "rgba(251,191,36,0.15)", text: "#FBBF24" },
+                  data: { bg: "rgba(96,165,250,0.15)", text: "#60A5FA" },
+                };
+                const bc = badgeColors[s.badge] || badgeColors.stable;
+                const isActive = idx === selectedScenario;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => handleScenarioChange(idx)}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 5,
+                      padding: "5px 11px",
+                      borderRadius: 20,
+                      border: isActive ? `1.5px solid ${t.accent}` : `1px solid ${t.border}`,
+                      background: isActive ? t.accentStrong : t.surfaceHover,
+                      color: isActive ? t.accent : t.text,
+                      fontSize: 11, fontWeight: isActive ? 700 : 500,
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    <span style={{ fontSize: 9, padding: "1px 5px", borderRadius: 6, fontWeight: 700, background: bc.bg, color: bc.text, textTransform: "uppercase", letterSpacing: 0.3 }}>{s.badge}</span>
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       )}
 
@@ -723,8 +700,8 @@ export default function Dashboard() {
           <Card style={{ marginBottom: 20, padding: "20px 24px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 700 }}>Confidence Flywheel — 13 Weeks</div>
-                <div style={{ fontSize: 11, color: t.textSecondary, marginTop: 2 }}>CEO confidence calibrated from weekly run history · W03–W15</div>
+                <div style={{ fontSize: 14, fontWeight: 700 }}>Confidence Flywheel — {d.confidence.history.length} Weeks</div>
+                <div style={{ fontSize: 11, color: t.textSecondary, marginTop: 2 }}>CEO confidence calibrated from weekly run history · {SCENARIOS[selectedScenario].label}</div>
               </div>
               <div style={{ display: "flex", gap: 16, fontSize: 11, color: t.textSecondary }}>
                 <span>Min: <b style={{ color: t.text }}>{Math.min(...d.confidence.history).toFixed(2)}</b></span>
@@ -735,10 +712,11 @@ export default function Dashboard() {
             <div style={{ position: "relative" }}>
               <MiniChart data={d.confidence.history} color={t.accent} height={80} width={Math.min(typeof window !== "undefined" ? window.innerWidth - 120 : 1100, 1100)} />
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 10, color: t.textSecondary, fontFamily: "'JetBrains Mono', monospace" }}>
-                {["W03","W04","W05","W06","W07","W08","W09","W10","W11","W12","W13","W14","W15"].map(w => <span key={w}>{w}</span>)}
+                {d.confidence.history.map((_, i) => <span key={i}>W{String(i + 1).padStart(2, "0")}</span>)}
               </div>
-              {/* Annotation for churn spike */}
-              <div style={{ fontSize: 10, color: t.red, marginTop: 6, fontWeight: 600 }}>▲ W13 churn spike (conf 0.72) → W15 recovery (conf 0.88)</div>
+              <div style={{ fontSize: 10, color: t.textSecondary, marginTop: 6, fontWeight: 600 }}>
+                {d.reporting_week} · {SCENARIOS[selectedScenario].description}
+              </div>
             </div>
           </Card>
 
