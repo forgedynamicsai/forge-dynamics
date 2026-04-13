@@ -428,6 +428,21 @@ export default function Dashboard() {
   return (
     <div style={{ minHeight: "100vh", background: t.bg, color: t.text, fontFamily: "'DM Sans', 'Segoe UI', system-ui, sans-serif", transition: "background 0.3s ease, color 0.3s ease", overflowX: "hidden" }}>
 
+      {/* ── DEMO BANNER ─────────────────────────────────────────────── */}
+      {!live && !loading && (
+        <div style={{ background: "rgba(212,168,83,0.1)", borderBottom: `1px solid rgba(212,168,83,0.25)`, padding: "9px 32px", display: "flex", alignItems: "center", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 12, color: "#D4A853", fontWeight: 700, letterSpacing: 0.3 }}>
+            DEMO MODE
+          </span>
+          <span style={{ fontSize: 12, color: "#8b8fa8" }}>
+            Viewing Growth Stage scenario — 13 weeks of simulated operational data. No Stripe or GitHub connection required.
+          </span>
+          <a href="https://forge-dynamics-executive-crew.vercel.app" style={{ fontSize: 12, color: "#D4A853", fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }} onMouseOver={e => e.target.style.textDecoration = "underline"} onMouseOut={e => e.target.style.textDecoration = "none"}>
+            Connect your own data →
+          </a>
+        </div>
+      )}
+
       {/* ── HEADER ──────────────────────────────────────────────────── */}
       <div style={{ padding: isMobile ? "14px 16px" : "14px 32px", borderBottom: `1px solid ${t.border}`, background: t.surface, position: "sticky", top: 0, zIndex: 10 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
