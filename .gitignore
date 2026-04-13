@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+.venv/
+venv/
+
+# Build output
+dashboard/dist/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store

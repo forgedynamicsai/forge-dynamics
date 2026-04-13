@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Forge Dynamics Terms of Service — the agreement governing your use of our AI Ops platform." />
+  <title>Terms of Service — Forge Dynamics</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --accent: #D4A853;
+      --accent-dim: rgba(212, 168, 83, 0.12);
+      --text: #e8eaf0;
+      --text-secondary: #8b8fa8;
+      --green: #4caf82;
+      --green-dim: rgba(76, 175, 130, 0.12);
+      --blue: #5b9bd5;
+      --blue-dim: rgba(91, 155, 213, 0.12);
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .page { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 0 40px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 48px;
+    }
+    .nav-brand { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: 0.02em; }
+    .nav-links { display: flex; gap: 24px; font-size: 13px; color: var(--text-secondary); }
+    .nav-links a { color: var(--text-secondary); }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    .hero { margin-bottom: 48px; }
+    h1 { font-size: 36px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; letter-spacing: -0.02em; }
+    .hero-sub { font-size: 15px; color: var(--text-secondary); max-width: 620px; line-height: 1.6; }
+    .effective { font-size: 12px; color: var(--text-secondary); margin-top: 10px; font-family: var(--mono); }
+
+    .section { margin-bottom: 44px; }
+    h2 { font-size: 18px; font-weight: 600; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 14px; font-weight: 600; margin: 20px 0 8px; color: var(--text); }
+
+    p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 12px; }
+    p strong { color: var(--text); }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 18px 20px; margin-bottom: 12px;
+    }
+    .card-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .card-body { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+    ul { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    ul li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text-secondary); }
+    ul li::before { content: '·'; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+
+    .notice {
+      background: var(--accent-dim); border: 1px solid rgba(212,168,83,0.3);
+      border-radius: 8px; padding: 16px 20px; margin-bottom: 20px;
+      font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+    }
+    .notice strong { color: var(--accent); }
+
+    .footer {
+      margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border);
+      font-size: 12px; color: var(--text-secondary);
+      display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center;
+    }
+    .footer a { color: var(--text-secondary); }
+    .footer a:hover { color: var(--text); text-decoration: none; }
+    .footer-spacer { flex: 1; }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #F3F5F8; --surface: #FFFFFF; --border: #E0E4EA;
+        --accent: #B8860B; --accent-dim: rgba(184,134,11,0.08);
+        --text: #1A2028; --text-secondary: #6B7A8D;
+        --green: #16A34A; --green-dim: rgba(22,163,74,0.10);
+        --blue: #2563EB; --blue-dim: rgba(37,99,235,0.08);
+      }
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 26px; }
+      .nav { flex-direction: column; gap: 8px; padding: 12px 0 28px; }
+      .nav-links { flex-wrap: wrap; gap: 12px; }
+      .footer { flex-direction: column; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <nav class="nav">
+    <span class="nav-brand">Forge Dynamics AI Ops</span>
+    <div class="nav-links">
+      <a href="/">Dashboard</a>
+      <a href="/security.html">Security</a>
+      <a href="/legal/privacy">Privacy Policy</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <h1>Terms of Service</h1>
+    <p class="hero-sub">
+      These terms govern your use of Forge Dynamics AI Ops. By using our platform, you agree to these terms.
+      Please read them carefully — they're written to be clear, not to obscure obligations.
+    </p>
+    <div class="effective">Effective date: April 12, 2026 · Last updated: April 12, 2026</div>
+  </div>
+
+  <div class="notice">
+    <strong>Key points:</strong> Forge Dynamics provides AI-generated operational recommendations.
+    These are advisory only — we are not a licensed financial advisor, legal counsel, or auditor.
+    You retain full ownership of your data. We never take autonomous actions without your explicit approval.
+  </div>
+
+  <div class="section">
+    <h2>1. The Service</h2>
+    <p>
+      Forge Dynamics AI Ops provides automated operational intelligence for SaaS businesses, including
+      weekly reporting, AI-generated recommendations, playbook-driven guidance, and operational memory
+      built from your Stripe and GitHub data.
+    </p>
+    <p>
+      All recommendations are advisory. <strong>You are responsible for all business decisions.</strong>
+      Forge Dynamics does not manage your business and is not liable for outcomes resulting from
+      following or not following its recommendations.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>2. Account &amp; Access</h2>
+    <ul>
+      <li>You must be 18 years or older and have authority to bind your organization to these terms.</li>
+      <li>You are responsible for maintaining the security of your account credentials and OAuth connections.</li>
+      <li>You must promptly notify us of any unauthorized access at <strong>legal@forgedynamics.dev</strong>.</li>
+      <li>One account per organization. Multi-tenant access requires separate authorization.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>3. Integrations &amp; Permissions</h2>
+    <p>
+      By connecting Stripe or GitHub, you grant Forge Dynamics read-only OAuth access scoped
+      as described in our <a href="/security.html">Security page</a> and <a href="/legal/privacy">Privacy Policy</a>.
+    </p>
+    <ul>
+      <li>We will never request write access to Stripe or GitHub beyond what is necessary for the service.</li>
+      <li>You may revoke OAuth access at any time through Stripe or GitHub's connected apps settings.</li>
+      <li>Actions classified as T2 (write actions in external systems) require your explicit approval before execution.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>4. Your Data</h2>
+    <p>
+      <strong>You own your data.</strong> Forge Dynamics processes your data to provide the service.
+      We do not claim ownership of your operational data, reports, or memory pages.
+    </p>
+    <p>
+      You may export your data at any time. Upon cancellation, you have 30 days to export.
+      You may request immediate deletion at any time. See our <a href="/legal/privacy">Privacy Policy</a>
+      for full data retention and deletion details.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>5. Acceptable Use</h2>
+    <p>You agree not to:</p>
+    <ul>
+      <li>Attempt to reverse-engineer, scrape, or extract proprietary algorithms, playbook logic, or model weights.</li>
+      <li>Use the service to process data belonging to individuals who have not consented to this processing.</li>
+      <li>Share your account credentials or provide unauthorized access to third parties.</li>
+      <li>Submit false, misleading, or manipulated data to influence AI recommendations.</li>
+      <li>Attempt to circumvent the human-in-the-loop approval system for T2 actions.</li>
+      <li>Use the service for any unlawful purpose or in violation of applicable regulations.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>6. AI Recommendations &amp; Limitations</h2>
+    <div class="card">
+      <div class="card-title">Advisory only — not a licensed professional</div>
+      <div class="card-body">
+        Forge Dynamics provides AI-generated operational guidance. This is not financial advice, legal
+        counsel, tax guidance, or professional services of any kind. The CEO, CFO, PM, and Advisor
+        agents generate recommendations based on patterns in your data. You should apply independent
+        judgment before acting on any recommendation.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Confidence scores are probabilistic, not guarantees</div>
+      <div class="card-body">
+        Confidence scores reflect calibrated historical accuracy of the system's recommendations.
+        A confidence score of 0.88 means the system has historically been correct in similar
+        situations ~88% of the time — not that any individual recommendation will succeed.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Financial metrics are deterministic; AI outputs are not</div>
+      <div class="card-body">
+        MRR, churn rate, unit economics, and all financial calculations are produced by deterministic
+        Python code and are auditable. Narrative recommendations, playbook selections, and Advisor
+        notes are produced by language models and may contain errors. Verify financial decisions
+        against your own records.
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>7. Payments &amp; Subscription</h2>
+    <ul>
+      <li>Subscription fees are billed in advance on a monthly or annual basis.</li>
+      <li>All fees are non-refundable except where required by law or at our sole discretion.</li>
+      <li>We may change pricing with 30 days' notice. Continued use constitutes acceptance.</li>
+      <li>Failure to pay may result in suspension or termination of access.</li>
+    </ul>
+    <p>Billing questions: <strong>legal@forgedynamics.dev</strong></p>
+  </div>
+
+  <div class="section">
+    <h2>8. Intellectual Property</h2>
+    <p>
+      Forge Dynamics retains ownership of the platform, algorithms, playbook logic, agent architecture,
+      and all software. Your operational data, reports generated from your data, and memory pages
+      derived from your data remain yours.
+    </p>
+    <p>
+      You may not reproduce, redistribute, or create derivative works from the Forge Dynamics platform
+      without written permission.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>9. Limitation of Liability</h2>
+    <p>
+      TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, FORGE DYNAMICS IS NOT LIABLE FOR ANY
+      INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOST PROFITS,
+      LOST REVENUE, OR BUSINESS INTERRUPTION, ARISING FROM YOUR USE OF OR INABILITY TO USE THE SERVICE.
+    </p>
+    <p>
+      OUR TOTAL LIABILITY TO YOU FOR ANY CLAIM ARISING FROM THESE TERMS OR THE SERVICE SHALL NOT
+      EXCEED THE AMOUNT YOU PAID TO US IN THE 12 MONTHS PRECEDING THE CLAIM.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>10. Indemnification</h2>
+    <p>
+      You agree to indemnify, defend, and hold harmless Forge Dynamics and its officers, directors,
+      and employees from any claim, liability, or expense (including legal fees) arising from your
+      use of the service, your violation of these terms, or your violation of any third-party rights.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>11. Termination</h2>
+    <p>
+      You may cancel your subscription at any time through the dashboard or by emailing
+      <strong>legal@forgedynamics.dev</strong>.
+    </p>
+    <p>
+      We may suspend or terminate your account for material breach of these terms, with or without
+      notice. Upon termination, your right to use the service ceases immediately. Data retention
+      obligations are as described in the <a href="/legal/privacy">Privacy Policy</a>.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>12. Changes to These Terms</h2>
+    <p>
+      We may update these terms from time to time. We will notify you of material changes via email
+      or the dashboard at least 14 days before they take effect. Continued use after the effective
+      date constitutes acceptance.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>13. Governing Law</h2>
+    <p>
+      These terms are governed by the laws of the State of Delaware, United States, without regard
+      to conflict of law principles. Any disputes shall be resolved by binding arbitration under the
+      rules of the American Arbitration Association, with proceedings conducted in Delaware.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>14. Contact</h2>
+    <p>
+      Legal and billing inquiries:<br />
+      <strong>legal@forgedynamics.dev</strong><br /><br />
+      Privacy requests and data questions:<br />
+      <strong>privacy@forgedynamics.dev</strong><br /><br />
+      We respond to all inquiries within 30 days.
+    </p>
+  </div>
+
+  <footer class="footer">
+    <span>Forge Dynamics AI Ops</span>
+    <a href="/legal/privacy">Privacy Policy</a>
+    <a href="/legal/terms">Terms of Service</a>
+    <a href="/security.html">Security</a>
+    <a href="https://x.com/dynamicforgedev">@dynamicforgedev</a>
+    <span class="footer-spacer"></span>
+    <span>Last updated: April 12, 2026</span>
+  </footer>
+
+</div>
+</body>
+</html>

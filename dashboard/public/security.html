@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Forge Dynamics security documentation — 958 automated tests, 59 adversarial red team cases, row-level security, human-in-the-loop governance." />
+  <title>Security — Forge Dynamics</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --accent: #D4A853;
+      --accent-dim: rgba(212, 168, 83, 0.12);
+      --text: #e8eaf0;
+      --text-secondary: #8b8fa8;
+      --green: #4caf82;
+      --green-dim: rgba(76, 175, 130, 0.12);
+      --blue: #5b9bd5;
+      --blue-dim: rgba(91, 155, 213, 0.12);
+      --red: #e05c6a;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Layout ── */
+    .page { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    /* ── Nav ── */
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 0 40px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 48px;
+    }
+    .nav-brand { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: 0.02em; }
+    .nav-links { display: flex; gap: 24px; font-size: 13px; color: var(--text-secondary); }
+    .nav-links a { color: var(--text-secondary); }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    /* ── Hero ── */
+    .hero { margin-bottom: 56px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--green-dim); border: 1px solid rgba(76,175,130,0.3);
+      border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600;
+      color: var(--green); letter-spacing: 0.04em; margin-bottom: 20px;
+    }
+    .hero-badge::before { content: '●'; font-size: 8px; }
+    h1 { font-size: 36px; font-weight: 700; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+    .hero-sub { font-size: 17px; color: var(--text-secondary); max-width: 620px; line-height: 1.6; }
+
+    /* ── Stat grid ── */
+    .stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px; margin-bottom: 56px;
+    }
+    .stat {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 20px;
+    }
+    .stat-number {
+      font-size: 28px; font-weight: 700; color: var(--accent);
+      font-family: var(--mono); letter-spacing: -0.02em;
+    }
+    .stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
+
+    /* ── Sections ── */
+    .section { margin-bottom: 52px; }
+    .section-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 20px; padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-icon {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .icon-green { background: var(--green-dim); }
+    .icon-blue { background: var(--blue-dim); }
+    .icon-gold { background: var(--accent-dim); }
+    h2 { font-size: 18px; font-weight: 600; }
+
+    /* ── Cards ── */
+    .cards { display: flex; flex-direction: column; gap: 12px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 18px 20px;
+    }
+    .card-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .card-body { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+    .card-tag {
+      display: inline-block; background: var(--green-dim); color: var(--green);
+      border: 1px solid rgba(76,175,130,0.25); border-radius: 4px;
+      font-size: 11px; font-weight: 600; padding: 2px 7px; margin-bottom: 8px;
+      letter-spacing: 0.04em;
+    }
+    .card-tag.blue { background: var(--blue-dim); color: var(--blue); border-color: rgba(91,155,213,0.25); }
+    .card-tag.gold { background: var(--accent-dim); color: var(--accent); border-color: rgba(212,168,83,0.25); }
+
+    /* ── Red team table ── */
+    .rt-grid {
+      display: grid; grid-template-columns: auto 1fr auto;
+      gap: 0; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+    }
+    .rt-row {
+      display: contents;
+    }
+    .rt-row > * {
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .rt-row:last-child > * { border-bottom: none; }
+    .rt-id { font-family: var(--mono); color: var(--accent); font-size: 11px; white-space: nowrap; }
+    .rt-name { color: var(--text); }
+    .rt-pass {
+      font-size: 11px; font-weight: 600; color: var(--green);
+      white-space: nowrap; text-align: right;
+    }
+
+    /* ── What we can't do ── */
+    .cant-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .cant-list li {
+      display: flex; gap: 10px; align-items: flex-start;
+      font-size: 13px; color: var(--text-secondary);
+    }
+    .cant-list li::before {
+      content: '✕'; color: var(--red); font-weight: 700;
+      flex-shrink: 0; margin-top: 1px;
+    }
+
+    /* ── Sub-processors table ── */
+    .sp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .sp-table th {
+      text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 600;
+      color: var(--text-secondary); letter-spacing: 0.06em; text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+    .sp-table td {
+      padding: 10px 12px; border-bottom: 1px solid var(--border);
+      color: var(--text-secondary); vertical-align: top;
+    }
+    .sp-table td:first-child { color: var(--text); font-weight: 500; }
+    .sp-table tr:last-child td { border-bottom: none; }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border);
+      font-size: 12px; color: var(--text-secondary);
+      display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center;
+    }
+    .footer a { color: var(--text-secondary); }
+    .footer a:hover { color: var(--text); text-decoration: none; }
+    .footer-spacer { flex: 1; }
+
+    /* ── Light theme (matches dashboard light mode) ── */
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #F3F5F8;
+        --surface: #FFFFFF;
+        --border: #E0E4EA;
+        --accent: #B8860B;
+        --accent-dim: rgba(184,134,11,0.08);
+        --text: #1A2028;
+        --text-secondary: #6B7A8D;
+        --green: #16A34A;
+        --green-dim: rgba(22,163,74,0.10);
+        --blue: #2563EB;
+        --blue-dim: rgba(37,99,235,0.08);
+        --red: #DC2626;
+      }
+      body { color: var(--text); }
+      .rt-name { color: var(--text); }
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 26px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .rt-grid { grid-template-columns: auto 1fr; }
+      .rt-pass { display: none; }
+
+      /* Nav stacks on small screens */
+      .nav { flex-direction: column; gap: 8px; padding: 12px 0 28px; }
+      .nav-links { flex-wrap: wrap; gap: 12px; }
+
+      /* Hide Location column in sub-processor table */
+      .sp-table th:last-child,
+      .sp-table td:last-child { display: none; }
+
+      /* Stat numbers slightly smaller */
+      .stat-number { font-size: 24px; }
+
+      /* Footer wraps cleanly */
+      .footer { flex-direction: column; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Nav -->
+  <nav class="nav">
+    <span class="nav-brand">Forge Dynamics AI Ops</span>
+    <div class="nav-links">
+      <a href="/">Dashboard</a>
+      <a href="/legal/privacy">Privacy Policy</a>
+      <a href="/legal/terms">Terms of Service</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge">Security &amp; Governance</div>
+    <h1>Your data, governed.</h1>
+    <p class="hero-sub">
+      Forge Dynamics was built from the ground up for founders who need to trust
+      an AI system with Stripe and GitHub access. Here is exactly what we built,
+      what we tested, and what we can and cannot do.
+    </p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-number">1018</div>
+      <div class="stat-label">Automated tests across unit, integration, and adversarial suites</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">59</div>
+      <div class="stat-label">Adversarial red team test cases across 8 attack vectors</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">26</div>
+      <div class="stat-label">Database tables with row-level security enforced on every one</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">5</div>
+      <div class="stat-label">AI agents — only 1 touches financial metrics (deterministic, no LLM)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">0</div>
+      <div class="stat-label">Actions taken without human approval (HITL on every T2 action)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">4</div>
+      <div class="stat-label">LLM providers the system was adversarially tested against</div>
+    </div>
+  </div>
+
+  <!-- Access model -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-green">🔒</div>
+      <h2>Access Model</h2>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <span class="card-tag">READ-ONLY</span>
+        <div class="card-title">Stripe — OAuth read-only access</div>
+        <div class="card-body">
+          We access subscription data, invoice statuses, payment events, and dunning
+          metadata. We use OAuth. We never see credit card numbers, bank account details,
+          payment method tokens, or any PCI-regulated data. We cannot initiate charges,
+          issue refunds, or modify any data in your Stripe account.
+        </div>
+      </div>
+      <div class="card">
+        <span class="card-tag">READ-ONLY</span>
+        <div class="card-title">GitHub — OAuth read-only access</div>
+        <div class="card-body">
+          We access issue and pull request metadata, repository activity metrics,
+          milestone statuses, and velocity signals. We do not process, store, or
+          transmit source code. Our system is programmatically restricted to
+          issue/PR and activity metadata only.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- What we can't do -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-green">🚫</div>
+      <h2>What We Cannot Do</h2>
+    </div>
+    <div class="card">
+      <ul class="cant-list">
+        <li>Initiate charges, refunds, or any write operation in your Stripe account</li>
+        <li>Read credit card numbers, bank account details, or PCI-regulated payment data</li>
+        <li>Modify, create, or delete issues or pull requests in your GitHub repositories</li>
+        <li>Read source code, secrets, or environment variables from your repositories</li>
+        <li>Take any action without your explicit approval (T2 actions require human-in-the-loop)</li>
+        <li>Share your data with other customers — row-level security prevents this at the database layer</li>
+        <li>Use your data to train AI models — Gemini Paid Services only, governed by Google's DPA</li>
+        <li>Access data from other integrations — only Stripe and GitHub are connected</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Deterministic financials -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-gold">📐</div>
+      <h2>Deterministic Financial Metrics</h2>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <span class="card-tag gold">NO LLM ON FINANCIALS</span>
+        <div class="card-title">CFO agent uses pure Python math</div>
+        <div class="card-body">
+          MRR, churn, velocity, unit economics, and all financial metrics are calculated
+          using deterministic Python code — not AI. The AI agents interpret the outputs
+          of these calculations. This means your financial numbers are auditable, repeatable,
+          and immune to hallucination.
+        </div>
+      </div>
+      <div class="card">
+        <span class="card-tag gold">ATTRIBUTION TIERS</span>
+        <div class="card-title">Saved revenue is never inflated</div>
+        <div class="card-body">
+          Saved MRR is tracked in three strictly separate tiers — Direct (deterministic event
+          match), Likely (correlated timing), and Operator-Reported (manual). The system has
+          no method to combine these into a single "total saved" number. This is enforced at
+          the schema level by design.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Human-in-the-loop -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-green">👤</div>
+      <h2>Human-in-the-Loop Governance</h2>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <span class="card-tag">HITL</span>
+        <div class="card-title">Three-tier action system — T0, T1, T2</div>
+        <div class="card-body">
+          <strong>T0 (Read-only):</strong> Metrics collection, report generation, memory search — no approval required.<br />
+          <strong>T1 (Draft-only):</strong> Slack digests, email summaries — staged before delivery, no external write access.<br />
+          <strong>T2 (Write with approval):</strong> Any action that modifies external systems requires explicit human approval. The system will never execute a T2 action autonomously.
+        </div>
+      </div>
+      <div class="card">
+        <span class="card-tag">AUDIT LOG</span>
+        <div class="card-title">Every action is logged with trace IDs</div>
+        <div class="card-body">
+          Every recommendation, approval, rejection, and system event is recorded in the
+          audit log with trace IDs and run IDs. You can see exactly what the system did,
+          when, and why.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Red team -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-gold">🛡</div>
+      <h2>Adversarial Red Team — 8 Attack Vectors, 59 Tests</h2>
+    </div>
+    <p style="font-size:13px; color: var(--text-secondary); margin-bottom: 16px;">
+      Before accepting a single customer's data, we ran 59 adversarial test cases against
+      the system across 8 attack vectors. Every test verifies that a real security invariant
+      holds. A failing test means a real vulnerability.
+    </p>
+    <div class="rt-grid">
+      <div class="rt-row">
+        <span class="rt-id">RT-01</span>
+        <span class="rt-name">Policy Rule 10 — fake signals attempting to authorize actions</span>
+        <span class="rt-pass">✓ PASS</span>
+      </div>
+      <div class="rt-row">
+        <span class="rt-id">RT-02</span>
+        <span class="rt-name">Entity collision — conflicting signals claiming the same entity</span>
+        <span class="rt-pass">✓ PASS</span>
+      </div>
+      <div class="rt-row">
+        <span class="rt-id">RT-03</span>
+        <span class="rt-name">Source trust override — third-party signal claiming first-party confidence</span>
+        <span class="rt-pass">✓ PASS</span>
+      </div>
+      <div class="rt-row">
+        <span class="rt-id">RT-04</span>
+        <span class="rt-name">ADR-014 violation — world context attempting to override operational memory</span>
+        <span class="rt-pass">✓ PASS</span>
+      </div>
+      <div class="rt-row">
+        <span class="rt-id">RT-05</span>
+        <span class="rt-name">Stale signal exploitation — expired TTL signals used as active</span>
+        <span class="rt-pass">✓ PASS</span>
+      </div>
+      <div class="rt-row">
+        <span class="rt-id">RT-06</span>
+        <span class="rt-name">Urgent trigger spam — rate limiting under flood conditions</span>
+        <span class="rt-pass">✓ PASS</span>
+      </div>
+      <div class="rt-row">
+        <span class="rt-id">RT-07</span>
+        <span class="rt-name">Unconfirmed entity trust — pending entities treated as authoritative</span>
+        <span class="rt-pass">✓ PASS</span>
+      </div>
+      <div class="rt-row">
+        <span class="rt-id">RT-08</span>
+        <span class="rt-name">Cross-tenant leakage — tenant A signals visible to tenant B</span>
+        <span class="rt-pass">✓ PASS</span>
+      </div>
+    </div>
+    <p style="font-size:12px; color: var(--text-secondary); margin-top: 10px;">
+      Additionally, 6 end-to-end policy integration tests (RT-L01–RT-L06) verify that
+      adversarial signal content cannot bypass confidence floors, escalation rules, or
+      action authorization constraints through the full advisor pipeline.
+    </p>
+  </div>
+
+  <!-- Data isolation -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-green">🗄</div>
+      <h2>Data Isolation — 26 Tables, All with RLS</h2>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <span class="card-tag">ROW-LEVEL SECURITY</span>
+        <div class="card-title">Every table isolated per customer at the database layer</div>
+        <div class="card-body">
+          All 26 tables in the ai_ops schema have row-level security enabled. No customer
+          can access another customer's data through the application or directly through
+          the database. Scoped JWTs are used for all database access — there are no
+          superuser application queries.
+        </div>
+      </div>
+      <div class="card">
+        <span class="card-tag">ENCRYPTION</span>
+        <div class="card-title">Encryption at rest and in transit</div>
+        <div class="card-body">
+          All data in transit uses TLS/HTTPS. All data at rest is encrypted in Supabase
+          (AES-256). OAuth tokens for Stripe and GitHub are stored encrypted — we never
+          store raw keys. Passwords are not accepted — we use OAuth exclusively.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI processing -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-blue">🤖</div>
+      <h2>AI Processing — Gemini Paid Services</h2>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <span class="card-tag blue">NO MODEL TRAINING</span>
+        <div class="card-title">Google Gemini Paid Services only</div>
+        <div class="card-body">
+          All LLM processing uses Google Gemini via Paid Services (not the free tier).
+          Under Google's Paid Services terms, customer data submitted via the API is not
+          used by Google to train or improve their models. Governed by Google's Data
+          Processing Addendum.
+        </div>
+      </div>
+      <div class="card">
+        <span class="card-tag blue">DATA MINIMIZATION</span>
+        <div class="card-title">Prompts use aggregated metrics, not raw customer records</div>
+        <div class="card-body">
+          AI agents receive aggregated operational metrics and memory summaries — not raw
+          Stripe records or GitHub issue contents. We apply pseudonymization where practicable.
+          Vector embeddings are generated from operational summaries and stored in our database.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data export -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-green">📦</div>
+      <h2>Data Export &amp; Deletion</h2>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <span class="card-tag">YOUR DATA</span>
+        <div class="card-title">Export anytime, delete anytime</div>
+        <div class="card-body">
+          Your data is yours. Export all memory pages, reports, playbooks, and audit logs
+          at any time via the tenant lifecycle system. After cancellation, you have 30 days
+          to export. Backup copies are purged within 90 days. You can request an immediate
+          hard purge at any time — production data is deleted immediately.
+        </div>
+      </div>
+      <div class="card">
+        <span class="card-tag">PREVIEW FIRST</span>
+        <div class="card-title">Purge dry-run before any irreversible deletion</div>
+        <div class="card-body">
+          Before any purge executes, the system generates a full deletion manifest showing
+          exactly how many rows will be deleted across every table. You review and confirm
+          the manifest before the purge can proceed. This is enforced at the application layer —
+          the confirm action is not available until the preview has been reviewed.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sub-processors -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-blue">🔗</div>
+      <h2>Sub-Processors</h2>
+    </div>
+    <div class="card">
+      <table class="sp-table">
+        <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Role</th>
+            <th>Location</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Supabase</td>
+            <td>Database hosting — all operational data encrypted at rest</td>
+            <td>United States</td>
+          </tr>
+          <tr>
+            <td>Google (Gemini)</td>
+            <td>LLM processing — minimized metrics + memory summaries. Paid Services only.</td>
+            <td>United States</td>
+          </tr>
+          <tr>
+            <td>Railway</td>
+            <td>Agent execution &amp; compute</td>
+            <td>United States</td>
+          </tr>
+          <tr>
+            <td>Vercel</td>
+            <td>Dashboard hosting — static frontend only</td>
+            <td>United States</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Contact -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-gold">✉</div>
+      <h2>Security Questions</h2>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        Questions about our security posture, data handling, or to request a Data
+        Processing Agreement:<br />
+        <strong style="color: var(--text);">privacy@forgedynamics.dev</strong>
+        &nbsp;·&nbsp;
+        <strong style="color: var(--text);">legal@forgedynamics.dev</strong>
+        <br /><br />
+        We respond within 30 days. Enterprise customers may request a negotiated DPA.
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <span>Forge Dynamics AI Ops</span>
+    <a href="/legal/privacy">Privacy Policy</a>
+    <a href="/legal/terms">Terms of Service</a>
+    <a href="https://x.com/dynamicforgedev">@dynamicforgedev</a>
+    <span class="footer-spacer"></span>
+    <span>Last updated: April 12, 2026</span>
+  </footer>
+
+</div>
+</body>
+</html>
