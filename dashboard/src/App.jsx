@@ -151,8 +151,8 @@ const SimpleBarChart = ({ data, labels, color, accentColor, height = 140, hideZe
           <span style={{ fontSize: 11, opacity: 0.6, fontWeight: 600 }}>{v > 0 ? v : ""}</span>
           <div style={{
             width: "100%", maxWidth: 32,
-            height: `${(v / max) * (height - 30)}px`,
-            background: i === data.length - 1 ? accentColor : color,
+            height: `${Math.max((v / max) * (height - 30), v > 0 ? 4 : 2)}px`,
+            background: v === 0 ? "rgba(255,255,255,0.07)" : (i === data.length - 1 ? accentColor : color),
             borderRadius: "4px 4px 0 0",
             transition: "height 0.5s ease",
           }} />
