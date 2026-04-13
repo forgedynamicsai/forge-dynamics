@@ -142,7 +142,7 @@ const MiniChart = ({ data, color, height = 40, width = 120 }) => {
   );
 };
 
-const SimpleBarChart = ({ data, labels, color, accentColor, height = 140 }) => {
+const SimpleBarChart = ({ data, labels, color, accentColor, height = 140, hideZeroLabels = false }) => {
   const max = Math.max(...data, 1);
   return (
     <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height, width: "100%", padding: "0 4px" }}>
@@ -156,7 +156,7 @@ const SimpleBarChart = ({ data, labels, color, accentColor, height = 140 }) => {
             borderRadius: "4px 4px 0 0",
             transition: "height 0.5s ease",
           }} />
-          <span style={{ fontSize: 10, opacity: 0.5 }}>{labels?.[i] || ""}</span>
+          <span style={{ fontSize: 10, opacity: 0.5 }}>{(hideZeroLabels && v === 0) ? "" : (labels?.[i] || "")}</span>
         </div>
       ))}
     </div>
@@ -857,16 +857,26 @@ export default function Dashboard() {
                 <span style={{ color: t.yellow }}>■ Reported</span>
               </div>
             </div>
-            <div style={{ fontSize: 11, color: t.textSecondary, marginBottom: 16 }}>Total saved MRR per week across all attribution tiers · only weeks with actions shown</div>
+            <div style={{ fontSize: 11, color: t.textSecondary, marginBottom: 16 }}>Total saved MRR per week across all attribution tiers · 13-week window</div>
             {(() => {
               if (attributionEntries.length === 0) return <div style={{ color: t.textSecondary, fontSize: 13, textAlign: "center", padding: 32 }}>No attribution data yet.</div>;
-              // Aggregate ALL tiers per week, only show weeks that had at least one action
+              // Aggregate per week
               const byWeek = {};
               attributionEntries.forEach(e => { byWeek[e.week] = (byWeek[e.week] || 0) + parseFloat(e.mrr_amount || 0); });
-              const activeWeeks = Object.keys(byWeek).sort();
-              const vals = activeWeeks.map(w => Math.round(byWeek[w]));
-              const labels = activeWeeks.map(w => w.replace("2026-", ""));
-              return <SimpleBarChart data={vals} labels={labels} color={t.chart} accentColor={t.green} height={160} />;
+              // Build full 13-week window ending at the latest week in data
+              const allWeekKeys = Object.keys(byWeek).sort();
+              const latestWeek = allWeekKeys[allWeekKeys.length - 1];
+              const [yr, wk] = latestWeek.split("-W").map(Number);
+              const weeks13 = [];
+              for (let i = 12; i >= 0; i--) {
+                let w = wk - i;
+                let y = yr;
+                if (w <= 0) { w += 52; y -= 1; }
+                weeks13.push(`${y}-W${String(w).padStart(2, "0")}`);
+              }
+              const vals = weeks13.map(w => Math.round(byWeek[w] || 0));
+              const labels = weeks13.map(w => w.replace(/\d{4}-/, ""));
+              return <SimpleBarChart data={vals} labels={labels} color={t.chart} accentColor={t.green} height={160} hideZeroLabels />;
             })()}
           </Card>
 
