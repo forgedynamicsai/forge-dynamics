@@ -2,7 +2,7 @@
 
 **AI Weekly COO for B2B SaaS founders.** Deterministic financials. Memory flywheel. Human-in-the-loop governance.
 
-[![Tests](https://img.shields.io/badge/tests-1018%20passing-brightgreen)](https://github.com/arronstreet-ops/forge-dynamics-executive-crew)
+[![Tests](https://img.shields.io/badge/tests-1%2C276%20passing-brightgreen)](https://github.com/forgedynamicsai/forge-dynamics-executive-crew)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-proprietary-lightgrey)](./LICENSE)
 
@@ -35,6 +35,11 @@ Stripe (read-only)          GitHub (read-only)
          │  (deterministic)    │    MRR · Churn · Unit Economics
          └─────────┬──────────┘
                    │ verified financial metrics
+         ┌─────────▼──────────┐
+         │  Evaluation Regime  │  ← Layer 1.5: risk posture engine
+         │  (signal engine)    │    ThresholdCurve · SafetyFloor · RiskVector
+         └─────────┬──────────┘
+                   │ regime signals
          ┌─────────▼──────────┐
          │   CEO Agent         │  ← Operational planning
          └─────────┬──────────┘    Weekly priority recommendation
@@ -75,6 +80,33 @@ All agent tools are classified by risk before execution:
 | **T2** | Write actions in external systems | Yes — explicit human approval |
 
 The system never takes a write action without your explicit approval. This is enforced architecturally, not by convention.
+
+---
+
+## Evaluation Regime System
+
+Between deterministic financial calculations and LLM narrative synthesis sits a new layer: the **Evaluation Regime**.
+
+The regime answers: "Given this company's current risk posture, what thresholds should govern escalation, intervention, and reporting?"
+
+Key components:
+
+**ThresholdCurve** — interpolates conservative/aggressive bounds across three curve shapes: LINEAR, SIGMOID (k∈[2,8] for smooth acceleration), and LOG (compressed sensitivity at scale). Every threshold adapts to the operator's risk tolerance.
+
+**RiskVector** — three-axis posture (financial · growth · operational), each ∈ [0.0, 0.95]. A single α scalar weights the blend. Conservative operators see tighter thresholds, earlier warnings. Aggressive operators get wider bands, fewer false positives.
+
+**SafetyFloor** — five α-independent hard limits. These never relax regardless of risk posture:
+- Churn rate ≥ 15%: escalate always
+- MRR decline ≥ 25%: escalate always
+- Cash runway < 6 weeks: escalate always
+- Failed payments > 30%: escalate always
+- Activation rate < 20%: escalate always
+
+**Signal Engine** — separates raw metric storage from signal computation. Snapshots are written once; signals are computed at read time from the active CalculatorConfig. SHA-256 keyed cache prevents redundant re-computation when posture is unchanged.
+
+**Dual-Track Evaluation** — escalation fires if the CEO's LLM judgment raises `requires_approval` OR a safety floor is breached. Either track is sufficient.
+
+The regime never touches Layer 1 financial formulas. It never affects action tiers. It is a read layer, not a write layer. (ADRs 010–013)
 
 ---
 
@@ -119,7 +151,7 @@ Forge Dynamics handles Stripe OAuth tokens, GitHub OAuth tokens, and business fi
 The short version:
 - All data in transit: TLS/HTTPS
 - All data at rest: AES-256 (Supabase)
-- 26 database tables, all with row-level security
+- 28 database tables, all with row-level security
 - Read-only OAuth scopes for Stripe and GitHub — we cannot initiate charges or write to your repos
 - Adversarial red team testing across 8 attack vectors before any customer data was connected
 
@@ -133,12 +165,13 @@ Full details at [forge-dynamics-executive-crew.vercel.app/security.html](https:/
 |-------|-----------|
 | Orchestration | LangGraph (state machine, checkpoints, HITL) |
 | Financial calculations | Python 3.11, Pydantic v2 |
+| Evaluation Regime | ThresholdCurve, RiskVector, SafetyFloor, Signal Engine |
 | Database | Supabase (PostgreSQL + pgvector) |
 | LLM inference | Google Gemini (Paid Services — not used for model training) |
 | Embeddings | Gemini gemini-embedding-001 (768-dim) |
 | Dashboard | React 18 + Vite, deployed on Vercel |
 | Agent compute | Railway |
-| Test suite | pytest — 1018 tests, 0 failing |
+| Test suite | pytest — 1,276 tests, 0 failing |
 
 ---
 
@@ -148,9 +181,9 @@ Full details at [forge-dynamics-executive-crew.vercel.app/security.html](https:/
 pytest
 ```
 
-1018 tests. Covers: CFO financial calculations, memory search, scenario runner framework, Stripe audit pipeline, confidence calibration, world context ingestion, entity resolution, LangGraph orchestration, output contract validation, and adversarial red team scenarios.
+1,276 tests. Covers: CFO financial calculations, memory search, scenario runner framework, Stripe audit pipeline, confidence calibration, world context ingestion, entity resolution, LangGraph orchestration, output contract validation, adversarial red team scenarios, and Evaluation Regime math (threshold curves, safety floors, signal/snapshot separation, audit layer, breakpoint solver).
 
-Test runtime: ~6 minutes. All tests run in mock mode — no external API calls required.
+Test runtime: ~8 minutes. All tests run in mock mode — no external API calls required.
 
 ---
 
@@ -182,10 +215,10 @@ Questions: privacy@forgedynamicsai.com
 
 ## Contact
 
-- X/Twitter: [@dynamicforgedev](https://x.com/dynamicforgedev)
+- X/Twitter: [@forgedynamicsai](https://x.com/forgedynamicsai)
 - Legal: legal@forgedynamicsai.com
 - Privacy: privacy@forgedynamicsai.com
 
 ---
 
-*Forge Dynamics AI Ops — Phase 10*
+*Forge Dynamics AI Ops — Phase 11 (Evaluation Regime System)*
